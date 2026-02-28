@@ -302,6 +302,24 @@ def list_audit_logs():
     data, total = get_store().audit_list(tenant_id, page=page, page_size=page_size, resource_type=resource_type)
     return jsonify({"data": data, "total": total, "page": page, "pageSize": page_size}), 200
 
+@app.route("/patients/export", methods=["GET"])
+def export_patients():
+    """患者列表导出（CSV），医疗合规：导出前脱敏。"""
+    tenant_id = _tenant()
+    doctor_id = _doctor_id() or request.args.get("doctorId")
+    data = get_store().patient_list(tenant_id, doctor_id=doctor_id or None)
+    data = [HISStore.apply_patient_masking(p) for p in data]
+    import csv, io
+    from flask import Response
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["patientId", "patientNo", "name", "gender", "idNo", "phone", "status", "createdAt"])
+    for row in data:
+        w.writerow([row.get("patientId", ""), row.get("patientNo", ""), row.get("name", ""), row.get("gender", ""), row.get("idNo", ""), row.get("phone", ""), row.get("status", ""), row.get("createdAt", "")])
+    get_store().audit_append(tenant_id, request.headers.get("X-User-Id") or "system", "EXPORT", "Patient", "", _request_id())
+    _human_audit(tenant_id, f"导出患者 {len(data)} 条（已脱敏）")
+    return Response(buf.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=his_patients.csv"})
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8011))
     app.run(host="0.0.0.0", port=port, debug=False)

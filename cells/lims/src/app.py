@@ -89,6 +89,7 @@ def create_sample():
     op_id = _operator_id() or body.get("operatorId", "")
     s = store.sample_create(tenant_id, body.get("sampleNo", ""), body.get("batchId", ""), body.get("testType", ""), op_id)
     store.idem_set(req_id, s["sampleId"])
+    store.audit_append(tenant_id, request.headers.get("X-User-Id") or "system", "CREATE", "Sample", s["sampleId"], req_id)
     _human_audit(tenant_id, f"创建样品 {s['sampleId']}", req_id)
     return jsonify(s), 201
 
@@ -130,6 +131,7 @@ def create_result():
     body = request.get_json() or {}
     r = store.result_create(tenant_id, body.get("sampleId", ""), body.get("testItem", ""), body.get("value", ""), body.get("unit", ""))
     store.idem_set(req_id, r["resultId"])
+    store.audit_append(tenant_id, request.headers.get("X-User-Id") or "system", "CREATE", "Result", r["resultId"], req_id)
     _human_audit(tenant_id, f"创建结果 {r['resultId']}", req_id)
     return jsonify(r), 201
 
@@ -263,6 +265,32 @@ def list_trace():
     entity_id = request.args.get("entityId")
     data = get_store().trace_list(tenant_id, entity_type=entity_type, entity_id=entity_id)
     return jsonify({"data": data, "total": len(data)}), 200
+
+@app.route("/audit-logs", methods=["GET"])
+def list_audit_logs():
+    """实验室合规：不可篡改操作审计日志。"""
+    tenant_id = _tenant()
+    page = max(1, int(request.args.get("page", 1)))
+    page_size = max(1, min(100, int(request.args.get("pageSize", 50))))
+    resource_type = request.args.get("resourceType", "").strip() or None
+    data, total = get_store().audit_list(tenant_id, page=page, page_size=page_size, resource_type=resource_type)
+    return jsonify({"data": data, "total": total, "page": page, "pageSize": page_size}), 200
+
+@app.route("/samples/export", methods=["GET"])
+def export_samples():
+    """样品列表导出（CSV），符合实验室数据留存与审计。"""
+    tenant_id = _tenant()
+    data = get_store().sample_list(tenant_id)
+    import csv, io
+    from flask import Response
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["sampleId", "sampleNo", "batchId", "testType", "status", "createdAt", "receivedAt"])
+    for row in data:
+        w.writerow([row.get("sampleId", ""), row.get("sampleNo", ""), row.get("batchId", ""), row.get("testType", ""), row.get("status", ""), row.get("createdAt", ""), row.get("receivedAt", "")])
+    get_store().audit_append(tenant_id, request.headers.get("X-User-Id") or "system", "EXPORT", "Sample", "", _request_id())
+    _human_audit(tenant_id, f"导出样品 {len(data)} 条")
+    return Response(buf.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=lims_samples.csv"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8013))

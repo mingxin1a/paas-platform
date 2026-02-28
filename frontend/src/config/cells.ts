@@ -69,8 +69,14 @@ export const CELLS: CellConfig[] = [
     path: "/inbound-orders",
     listKey: "data",
     idKey: "orderId",
+    exportPath: "/inbound-orders/export",
+    createFields: [
+      { name: "warehouseId", label: "仓库ID", required: true, placeholder: "必填" },
+      { name: "typeCode", label: "类型", type: "text", placeholder: "purchase/production/return" },
+      { name: "sourceOrderId", label: "来源单号", type: "text", placeholder: "选填" },
+    ],
     labelMap: {
-      orderId: "入库单ID", tenantId: "租户", warehouseId: "仓库", status: "状态",
+      orderId: "入库单ID", tenantId: "租户", warehouseId: "仓库", typeCode: "类型", status: "状态",
       createdAt: "创建时间", updatedAt: "更新时间",
     },
   },
@@ -111,9 +117,16 @@ export const CELLS: CellConfig[] = [
     path: "/work-orders",
     listKey: "data",
     idKey: "workOrderId",
+    exportPath: "/production-orders/export",
+    createFields: [
+      { name: "orderNo", label: "工单号", required: true, placeholder: "必填" },
+      { name: "productCode", label: "产品编码", type: "text", placeholder: "选填" },
+      { name: "qty", label: "数量", type: "number", required: true },
+      { name: "workshopId", label: "车间ID", type: "text", placeholder: "选填" },
+    ],
     labelMap: {
-      workOrderId: "工单ID", productId: "产品", quantity: "数量", status: "状态",
-      plannedStartAt: "计划开始", plannedEndAt: "计划结束", createdAt: "创建时间", updatedAt: "更新时间",
+      workOrderId: "工单ID", orderNo: "工单号", productCode: "产品编码", quantity: "数量", qty: "数量", status: "状态",
+      plannedStartAt: "计划开始", plannedEndAt: "计划结束", workshopId: "车间", createdAt: "创建时间", updatedAt: "更新时间",
     },
   },
   {
@@ -123,9 +136,18 @@ export const CELLS: CellConfig[] = [
     path: "/shipments",
     listKey: "data",
     idKey: "shipmentId",
+    exportPath: "/shipments/export",
+    createFields: [
+      { name: "trackingNo", label: "运单号", required: true, placeholder: "必填" },
+      { name: "origin", label: "发货地", type: "text", required: true },
+      { name: "destination", label: "目的地", type: "text", required: true },
+      { name: "vehicleId", label: "车辆ID", type: "text", placeholder: "选填" },
+      { name: "driverId", label: "司机ID", type: "text", placeholder: "选填" },
+    ],
     labelMap: {
-      shipmentId: "运单ID", orderId: "订单", carrier: "承运商", status: "状态",
-      fromAddress: "发货地", toAddress: "收货地", createdAt: "创建时间", updatedAt: "更新时间",
+      shipmentId: "运单ID", trackingNo: "运单号", origin: "发货地", destination: "目的地",
+      orderId: "订单", carrier: "承运商", status: "状态", fromAddress: "发货地", toAddress: "收货地",
+      createdAt: "创建时间", updatedAt: "更新时间",
     },
   },
   {
@@ -154,6 +176,7 @@ export const CELLS: CellConfig[] = [
     path: "/products",
     listKey: "data",
     idKey: "productId",
+    exportPath: "/products/export",
     labelMap: {
       productId: "产品ID", productCode: "编码", name: "名称", version: "版本", status: "状态",
       createdAt: "创建时间", updatedAt: "更新时间",
@@ -166,6 +189,7 @@ export const CELLS: CellConfig[] = [
     path: "/consumption-records",
     listKey: "data",
     idKey: "recordId",
+    exportPath: "/export",
     labelMap: {
       recordId: "记录ID", meterId: "计量点", value: "数值", unit: "单位", recordTime: "记录时间",
       tenantId: "租户", createdAt: "创建时间",
@@ -178,6 +202,7 @@ export const CELLS: CellConfig[] = [
     path: "/patients",
     listKey: "data",
     idKey: "patientId",
+    exportPath: "/patients/export",
     labelMap: {
       patientId: "患者ID", name: "姓名", idNumber: "证件号", phone: "电话", status: "状态",
       createdAt: "创建时间", updatedAt: "更新时间",
@@ -190,6 +215,7 @@ export const CELLS: CellConfig[] = [
     path: "/samples",
     listKey: "data",
     idKey: "sampleId",
+    exportPath: "/samples/export",
     labelMap: {
       sampleId: "样本ID", patientId: "患者", type: "类型", status: "状态", collectedAt: "采集时间",
       createdAt: "创建时间", updatedAt: "更新时间",
@@ -202,6 +228,7 @@ export const CELLS: CellConfig[] = [
     path: "/samples",
     listKey: "data",
     idKey: "sampleId",
+    exportPath: "/samples/export",
     labelMap: {
       sampleId: "样本ID", specimenType: "标本类型", status: "状态", receivedAt: "接收时间",
       createdAt: "创建时间", updatedAt: "更新时间",

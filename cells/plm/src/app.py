@@ -273,6 +273,23 @@ def list_audit_logs():
     data, total = get_store().audit_list(tenant_id, page=page, page_size=page_size, resource_type=resource_type)
     return jsonify({"data": data, "total": total, "page": page, "pageSize": page_size}), 200
 
+@app.route("/products/export", methods=["GET"])
+def export_products():
+    """产品列表导出（CSV），研发数据权限过滤。"""
+    tenant_id = _tenant()
+    owner_id = _owner_id() or request.args.get("ownerId")
+    data, _ = get_store().product_list(tenant_id, owner_id=owner_id or None, page=1, page_size=10000)
+    import csv, io
+    from flask import Response
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["productId", "productCode", "name", "version", "status", "ownerId", "createdAt"])
+    for row in data:
+        w.writerow([row.get("productId", ""), row.get("productCode", ""), row.get("name", ""), row.get("version", ""), row.get("status", ""), row.get("ownerId", ""), row.get("createdAt", "")])
+    get_store().audit_append(tenant_id, request.headers.get("X-User-Id") or "system", "EXPORT", "Product", "", _request_id())
+    _human_audit(tenant_id, f"导出产品 {len(data)} 条")
+    return Response(buf.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=plm_products.csv"})
+
 @app.route("/products/import", methods=["POST"])
 def import_products():
     tenant_id = _tenant()

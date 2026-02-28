@@ -104,8 +104,10 @@
 
 | 用途 | 命令 | 输出 |
 |------|------|------|
+| **最终验收（推荐）** | `python scripts/run_final_acceptance.py` | `dist/最终验收报告.md`（含文档生成、pytest 自检、覆盖率、商用验收） |
 | 全量验收 | `python scripts/run_acceptance_test.py` | `dist/acceptance_report_YYYYMMDD_HHMM.md` |
 | 分模块验收 | `python scripts/run_module_acceptance.py <cell_id>` | 同上（仅执行该 Cell 相关项） |
 | 仅健康检查 | `python scripts/run_acceptance_test.py --health-only` | 同上（仅各细胞 /health） |
+| 补齐缺失文档 | `python scripts/generate_docs.py` | 自动生成缺失的用户手册、管理员手册、接口文档 |
 
-环境变量 `GATEWAY_URL` 可指定网关地址（默认 `http://localhost:8000`）。报告可附于本清单后。
+环境变量 `GATEWAY_URL` 可指定网关地址（默认 `http://localhost:8000`）。无网关时可执行 `run_final_acceptance.py --skip-gateway` 仅跑自检与覆盖率。报告可附于本清单后。

@@ -17,6 +17,7 @@ class LIMSStore:
         self.experiment_data: List[dict] = []
         self.reports: Dict[str, dict] = {}
         self.traces: List[dict] = []
+        self._audit_log: List[dict] = []
         self._idem: Dict[str, str] = {}
 
     def idem_get(self, k: str) -> Optional[str]:
@@ -162,6 +163,18 @@ class LIMSStore:
             out = [t for t in out if t.get("entityId") == entity_id]
         out.sort(key=lambda x: x.get("occurredAt", ""), reverse=True)
         return out
+
+    def audit_append(self, tenant_id: str, user_id: str, action: str, resource_type: str, resource_id: str, trace_id: str = "") -> None:
+        self._audit_log.append({"tenantId": tenant_id, "userId": user_id, "action": action, "resourceType": resource_type, "resourceId": resource_id, "traceId": trace_id, "occurredAt": _ts()})
+
+    def audit_list(self, tenant_id: str, page: int = 1, page_size: int = 50, resource_type: Optional[str] = None) -> tuple:
+        out = [a for a in self._audit_log if a.get("tenantId") == tenant_id]
+        if resource_type:
+            out = [a for a in out if a.get("resourceType") == resource_type]
+        out.sort(key=lambda x: x.get("occurredAt", ""), reverse=True)
+        total = len(out)
+        start = (page - 1) * page_size
+        return out[start:start + page_size], total
 
 
 _store: Optional[LIMSStore] = None

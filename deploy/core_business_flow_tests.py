@@ -106,23 +106,39 @@ def test_wms_flow() -> tuple[bool, str]:
     code, body = _req("GET", _base("wms", "inventory"))
     if code != 200:
         return False, f"WMS 库存列表 失败: {code} {body}"
-    code2, ib = _req("POST", _base("wms", "inbound/receive"), {
-        "inboundNo": f"IB-{int(time.time())}", "lines": [{"skuCode": "SKU-ACC", "quantity": 100, "lotNumber": "LOT1"}]
+    code2, ib = _req("POST", _base("wms", "inbound-orders"), {
+        "warehouseId": "WH-ACC", "typeCode": "purchase", "sourceOrderId": "", "erpOrderId": ""
     })
     if code2 not in (200, 201):
-        return False, f"WMS 入库 失败: {code2} {ib}"
-    return True, "WMS 库存查询+入库 OK"
+        return False, f"WMS 创建入库单 失败: {code2} {ib}"
+    order_id = ib.get("orderId") or ib.get("id")
+    if not order_id:
+        return False, f"WMS 入库单未返回 orderId: {ib}"
+    code3, _ = _req("GET", _base("wms", f"inbound-orders/{order_id}"))
+    if code3 != 200:
+        return False, f"WMS 入库单详情 失败: {code3}"
+    return True, "WMS 库存查询+入库单创建+详情 OK"
 
 
 # ---------- 5. MES：生产计划→工单→领料→报工→生产入库 ----------
 def test_mes_flow() -> tuple[bool, str]:
-    code, body = _req("GET", _base("mes", "production-orders"))
+    code, body = _req("GET", _base("mes", "work-orders"))
     if code != 200:
         return False, f"MES 工单列表 失败: {code} {body}"
     code2, body2 = _req("GET", _base("mes", "boms"))
     if code2 != 200:
         return False, f"MES BOM 列表 失败: {code2} {body2}"
-    return True, "MES 工单+BOM 查询 OK"
+    code3, wo = _req("POST", _base("mes", "work-orders"), {
+        "orderNo": f"WO-ACC-{int(time.time())}", "productCode": "P001", "qty": 10, "workshopId": "WS1"
+    })
+    if code3 not in (200, 201):
+        return False, f"MES 创建工单 失败: {code3} {wo}"
+    wo_id = wo.get("workOrderId") or wo.get("id")
+    if wo_id:
+        code4, _ = _req("GET", _base("mes", f"work-orders/{wo_id}"))
+        if code4 != 200:
+            return False, f"MES 工单详情 失败: {code4}"
+    return True, "MES 工单列表+BOM+创建工单+详情 OK"
 
 
 # ---------- 6. OA：审批列表/创建 ----------
@@ -146,7 +162,18 @@ def test_tms_flow() -> tuple[bool, str]:
     code, body = _req("GET", _base("tms", "shipments"))
     if code != 200:
         return False, f"TMS 运单列表 失败: {code} {body}"
-    return True, "TMS 运单列表 OK"
+    code2, sh = _req("POST", _base("tms", "shipments"), {
+        "trackingNo": f"TMS-ACC-{int(time.time())}", "origin": "北京", "destination": "上海",
+        "vehicleId": "", "driverId": "", "wmsOutboundOrderId": "", "erpOrderId": ""
+    })
+    if code2 not in (200, 201):
+        return False, f"TMS 创建运单 失败: {code2} {sh}"
+    sh_id = sh.get("shipmentId") or sh.get("id")
+    if sh_id:
+        code3, _ = _req("GET", _base("tms", f"shipments/{sh_id}"))
+        if code3 != 200:
+            return False, f"TMS 运单详情 失败: {code3}"
+    return True, "TMS 运单列表+创建+详情 OK"
 
 
 # ---------- 9. EMS：能耗记录+统计 ----------

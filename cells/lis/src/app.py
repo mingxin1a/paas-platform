@@ -228,6 +228,23 @@ def list_audit_logs():
     data, total = get_store().audit_list(tenant_id, page=page, page_size=page_size)
     return jsonify({"data": data, "total": total, "page": page, "pageSize": page_size}), 200
 
+@app.route("/samples/export", methods=["GET"])
+def export_samples():
+    """样本列表导出（CSV），检验数据脱敏与审计。"""
+    tenant_id = _tenant()
+    technician_id = _technician_id() or request.args.get("technicianId")
+    data = get_store().sample_list(tenant_id, technician_id=technician_id or None)
+    import csv, io
+    from flask import Response
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["sampleId", "sampleNo", "patientId", "requestId", "specimenType", "status", "collectedAt", "createdAt"])
+    for row in data:
+        w.writerow([row.get("sampleId", ""), row.get("sampleNo", ""), row.get("patientId", ""), row.get("requestId", ""), row.get("specimenType", ""), row.get("status", ""), row.get("collectedAt", ""), row.get("createdAt", "")])
+    get_store().audit_append(tenant_id, request.headers.get("X-User-Id") or "system", "EXPORT", "Sample", "", _request_id())
+    _human_audit(tenant_id, f"导出样本 {len(data)} 条")
+    return Response(buf.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=lis_samples.csv"})
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8012))
     app.run(host="0.0.0.0", port=port, debug=False)
