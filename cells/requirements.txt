@@ -1,0 +1,3 @@
+# 细胞模块统一依赖（解耦：不依赖 platform_core，仅标准库 + Flask）
+# 各细胞在各自目录维护 requirements.txt，与此保持一致即可
+flask>=2.3.0

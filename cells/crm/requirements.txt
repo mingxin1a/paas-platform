@@ -1,0 +1,5 @@
+# CRM 细胞独立依赖（解耦：不依赖 platform_core）
+# FastAPI 主实现（《接口设计说明书》+ 细胞档案）
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.0.0

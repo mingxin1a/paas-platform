@@ -1,0 +1,40 @@
+# 精细化告警规则：服务不可用、接口超时、数据库高占用（占位）
+# 与 alerts.example.yaml 合并；实际指标名需与 Prometheus 抓取一致
+
+groups:
+  - name: cells-tenant
+    rules:
+      - alert: CellDown
+        expr: up{job="cells"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "细胞不可用"
+          description: "细胞 {{ $labels.cell }} 已宕机超过 1 分钟"
+
+      - alert: GatewayDown
+        expr: up{job="gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "网关不可用"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job, cell)) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "接口超时"
+          description: "{{ $labels.cell }} P99 延迟超过 5 秒"
+
+      # 数据库高占用（需 Exporter 暴露 db 指标后启用）
+      # - alert: DatabaseHighUsage
+      #   expr: (db_connection_usage / db_connection_max) > 0.9
+      #   for: 5m
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "数据库连接占用过高"

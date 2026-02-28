@@ -1,0 +1,395 @@
+# SuperPaaS 全平台一键启动（生产级单机编排）
+# 网关、治理中心、双前端、13 细胞、监控中心、可选 Redis/联动 Worker；环境变量统一由 .env 注入
+# 增量更新：docker compose up -d --build [SERVICE]；失败回滚：由 deploy.sh 自动 stop 本次启动服务
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    profiles:
+      - with-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  governance:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.governance
+    env_file:
+      - .env
+    ports:
+      - "${GOVERNANCE_PORT:-8005}:8005"
+    environment:
+      GOVERNANCE_PORT: "8005"
+      GOVERNANCE_HEALTH_INTERVAL_SEC: "30"
+      GOVERNANCE_HEALTH_FAILURE_THRESHOLD: "3"
+      CELL_CRM_URL: http://crm-cell:8001
+      CELL_ERP_URL: http://erp-cell:8002
+      CELL_WMS_URL: http://wms-cell:8003
+      CELL_HRM_URL: http://hrm-cell:8004
+      CELL_OA_URL: http://oa-cell:8005
+      CELL_MES_URL: http://mes-cell:8006
+      CELL_TMS_URL: http://tms-cell:8007
+      CELL_SRM_URL: http://srm-cell:8008
+      CELL_PLM_URL: http://plm-cell:8009
+      CELL_EMS_URL: http://ems-cell:8010
+      CELL_HIS_URL: http://his-cell:8011
+      CELL_LIS_URL: http://lis-cell:8012
+      CELL_LIMS_URL: http://lims-cell:8013
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/api/governance/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: on-failure
+    networks:
+      - paas-net
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+    env_file:
+      - .env
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    environment:
+      GATEWAY_PORT: "8000"
+      USE_REAL_FORWARD: "1"
+      GOVERNANCE_URL: http://governance:8005
+      CELL_CRM_URL: http://crm-cell:8001
+      CELL_ERP_URL: http://erp-cell:8002
+      CELL_WMS_URL: http://wms-cell:8003
+      CELL_HRM_URL: http://hrm-cell:8004
+      CELL_OA_URL: http://oa-cell:8005
+      CELL_MES_URL: http://mes-cell:8006
+      CELL_TMS_URL: http://tms-cell:8007
+      CELL_SRM_URL: http://srm-cell:8008
+      CELL_PLM_URL: http://plm-cell:8009
+      CELL_EMS_URL: http://ems-cell:8010
+      CELL_HIS_URL: http://his-cell:8011
+      CELL_LIS_URL: http://lis-cell:8012
+      CELL_LIMS_URL: http://lims-cell:8013
+    depends_on:
+      governance:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: on-failure
+    networks:
+      - paas-net
+
+  monitor:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.monitor
+    env_file:
+      - .env
+    ports:
+      - "${MONITOR_PORT:-9000}:9000"
+    environment:
+      PORT: "9000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  sync-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.sync-worker
+    profiles:
+      - with-sync-worker
+    env_file:
+      - .env
+    environment:
+      GATEWAY_URL: http://gateway:8000
+      LINK_ERP_TO_MES: "1"
+      LINK_MES_TO_WMS: "1"
+      LINK_WMS_TO_TMS: "1"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - paas-net
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    env_file:
+      - .env
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      - gateway
+    restart: on-failure
+    networks:
+      - paas-net
+
+  frontend-admin:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend-admin
+    env_file:
+      - .env
+    ports:
+      - "${FRONTEND_ADMIN_PORT:-5174}:80"
+    depends_on:
+      - gateway
+    restart: on-failure
+    networks:
+      - paas-net
+
+  crm-cell:
+    build:
+      context: ../cells/crm
+      dockerfile: Dockerfile
+    expose: ["8001"]
+    environment:
+      PORT: "8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  erp-cell:
+    build:
+      context: ../cells/erp
+      dockerfile: Dockerfile
+    expose: ["8002"]
+    environment:
+      PORT: "8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  wms-cell:
+    build:
+      context: ../cells/wms
+      dockerfile: Dockerfile
+    expose: ["8003"]
+    environment:
+      PORT: "8003"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  hrm-cell:
+    build:
+      context: ../cells/hrm
+      dockerfile: Dockerfile
+    expose: ["8004"]
+    environment:
+      PORT: "8004"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  oa-cell:
+    build:
+      context: ../cells/oa
+      dockerfile: Dockerfile
+    expose: ["8005"]
+    environment:
+      PORT: "8005"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  mes-cell:
+    build:
+      context: ../cells/mes
+      dockerfile: Dockerfile
+    expose: ["8006"]
+    environment:
+      PORT: "8006"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  tms-cell:
+    build:
+      context: ../cells/tms
+      dockerfile: Dockerfile
+    expose: ["8007"]
+    environment:
+      PORT: "8007"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8007/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  srm-cell:
+    build:
+      context: ../cells/srm
+      dockerfile: Dockerfile
+    expose: ["8008"]
+    environment:
+      PORT: "8008"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8008/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  plm-cell:
+    build:
+      context: ../cells/plm
+      dockerfile: Dockerfile
+    expose: ["8009"]
+    environment:
+      PORT: "8009"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8009/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  ems-cell:
+    build:
+      context: ../cells/ems
+      dockerfile: Dockerfile
+    expose: ["8010"]
+    environment:
+      PORT: "8010"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  his-cell:
+    build:
+      context: ../cells/his
+      dockerfile: Dockerfile
+    expose: ["8011"]
+    environment:
+      PORT: "8011"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8011/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  lis-cell:
+    build:
+      context: ../cells/lis
+      dockerfile: Dockerfile
+    expose: ["8012"]
+    environment:
+      PORT: "8012"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8012/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  lims-cell:
+    build:
+      context: ../cells/lims
+      dockerfile: Dockerfile
+    expose: ["8013"]
+    environment:
+      PORT: "8013"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8013/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+  lims-cell:
+    build:
+      context: ../cells/lims
+      dockerfile: Dockerfile
+    expose: ["8013"]
+    environment:
+      PORT: "8013"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8013/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: on-failure
+    networks:
+      - paas-net
+
+networks:
+  paas-net:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

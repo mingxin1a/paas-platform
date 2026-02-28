@@ -1,0 +1,151 @@
+# 企业级告警规则：服务宕机、接口异常、性能瓶颈、资源不足、数据异常
+# 分级：P0=紧急 P1=高 P2=中 P3=低；与 alertmanager 路由配合
+
+groups:
+  # ---------- P0：服务宕机（立即处理） ----------
+  - name: p0-service-down
+    rules:
+      - alert: GatewayDown
+        expr: up{job="gateway"} == 0
+        for: 1m
+        labels:
+          severity: p0
+          level: critical
+        annotations:
+          summary: "[P0] 网关不可用"
+          description: "网关已宕机超过 1 分钟，影响全平台访问。"
+
+      - alert: GovernanceDown
+        expr: up{job="governance"} == 0
+        for: 1m
+        labels:
+          severity: p0
+          level: critical
+        annotations:
+          summary: "[P0] 治理中心不可用"
+          description: "治理中心已宕机超过 1 分钟，健康汇总与路由可能异常。"
+
+      - alert: CellDown
+        expr: up{job="cells-health"} == 0
+        for: 2m
+        labels:
+          severity: p0
+          level: critical
+        annotations:
+          summary: "[P0] 细胞服务不可用"
+          description: "细胞 {{ $labels.cell }} 已宕机超过 2 分钟。"
+
+      - alert: MonitorDown
+        expr: up{job="monitor"} == 0
+        for: 2m
+        labels:
+          severity: p1
+          level: high
+        annotations:
+          summary: "[P1] 监控中心不可用"
+          description: "监控中心已宕机，不影响业务但影响可观测性。"
+
+  # ---------- P1：接口异常、性能瓶颈 ----------
+  - name: p1-api-anomaly
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (sum(rate(http_requests_total{status=~"5.."}[5m])) by (job, cell) / sum(rate(http_requests_total[5m])) by (job, cell)) > 0.1
+        for: 5m
+        labels:
+          severity: p1
+          level: high
+        annotations:
+          summary: "[P1] 接口错误率过高"
+          description: "{{ $labels.job }}{{ $labels.cell }} 5xx 率超过 10%。"
+
+      - alert: HighLatencyP99
+        expr: |
+          histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job, cell)) > 5
+        for: 5m
+        labels:
+          severity: p1
+          level: high
+        annotations:
+          summary: "[P1] 接口 P99 延迟过高"
+          description: "{{ $labels.job }}{{ $labels.cell }} P99 延迟超过 5 秒。"
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job, cell)) > 3
+        for: 10m
+        labels:
+          severity: p2
+          level: warning
+        annotations:
+          summary: "[P2] 接口 P95 延迟偏高"
+          description: "{{ $labels.job }}{{ $labels.cell }} P95 延迟超过 3 秒。"
+
+  # ---------- P2：资源不足 ----------
+  - name: p2-resource
+    rules:
+      - alert: HighCPUUsage
+        expr: (100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance) * 100)) > 85
+        for: 5m
+        labels:
+          severity: p2
+          level: warning
+        annotations:
+          summary: "[P2] 主机 CPU 使用率过高"
+          description: "实例 {{ $labels.instance }} CPU 使用率超过 85%。"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: p2
+          level: warning
+        annotations:
+          summary: "[P2] 主机内存使用率过高"
+          description: "实例 {{ $labels.instance }} 内存使用率超过 90%。"
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 2m
+        labels:
+          severity: p2
+          level: warning
+        annotations:
+          summary: "[P2] Redis 不可用"
+          description: "Redis 或 redis-exporter 不可用。"
+
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: p2
+          level: warning
+        annotations:
+          summary: "[P2] Redis 内存占用过高"
+          description: "Redis 内存使用超过 90%。"
+
+  # ---------- P3：数据异常、可用性降级 ----------
+  - name: p3-data-anomaly
+    rules:
+      - alert: NoScrapeData
+        expr: absent(up{job=~"gateway|governance|cells-health"}) or (count(up{job="cells-health"} == 1) < 10)
+        for: 5m
+        labels:
+          severity: p3
+          level: info
+        annotations:
+          summary: "[P3] 采集数据缺失或细胞大面积不可用"
+          description: "Prometheus 未收到网关/治理中心/细胞健康数据，或健康细胞数少于 10。"
+
+      - alert: CellHealthDegraded
+        expr: count(up{job="cells-health"} == 0) >= 1
+        for: 5m
+        labels:
+          severity: p3
+          level: info
+        annotations:
+          summary: "[P3] 部分细胞不健康"
+          description: "存在 {{ $value }} 个细胞未通过健康检查。"
+
+  # ---------- 占位：网关未暴露 /metrics 时上述 RED 规则不触发；仅 up 与 node/redis 生效 ----------
+  # 网关实现 RED 指标后取消注释或合并到 gateway-metrics job

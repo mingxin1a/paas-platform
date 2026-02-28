@@ -1,0 +1,8 @@
+# SuperPaaS 命名空间与基础标签
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: paas
+  labels:
+    app.kubernetes.io/name: superpaas
+    app.kubernetes.io/part-of: superpaas-platform

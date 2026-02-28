@@ -1,0 +1,40 @@
+# HRM 细胞 API 合约 - 对标 OrangeHRM 通用能力，SuperPaaS 架构
+openapi: 3.0.3
+info:
+  title: HRM Cell API
+  description: 人力资源管理细胞，经 PaaS 网关暴露
+  version: 1.0.0
+servers: [{ url: /api/v1/hrm }]
+paths:
+  /health:
+    get:
+      summary: 健康检查
+      responses: { '200': { description: OK } }
+  /employees:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 员工列表 } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /departments:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 部门列表 } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /leave-requests:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 请假申请列表 } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+components:
+  schemas: { Error: { type: object, properties: { code: {}, message: {}, requestId: {} } } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

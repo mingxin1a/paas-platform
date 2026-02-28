@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info: { title: WMS Cell API, version: 1.0.0 }
+servers: [{ url: /api/v1/wms }]
+paths:
+  /inventory:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }, { name: warehouseId, in: query }]
+      responses: { '200': { description: OK } }
+  /inbound-orders:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /outbound-orders:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+components:
+  schemas: { Error: { type: object, properties: { code: {}, message: {}, requestId: {} } } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

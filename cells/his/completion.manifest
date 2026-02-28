@@ -1,0 +1,28 @@
+# HIS 细胞交付清单 - 患者→挂号→就诊→处方→收费→住院→病历
+cell_name: his
+version: "1.0.0"
+delivered:
+  - id: patients
+    description: 患者管理 GET/POST、GET by id（脱敏）
+  - id: visits
+    description: 就诊 GET/POST、GET by id
+  - id: registration
+    description: 挂号 GET 列表、POST 创建（幂等）
+  - id: prescriptions
+    description: 处方开具 POST
+  - id: charges
+    description: 收费 GET 列表、POST 创建、POST /charges/:id/pay 缴费
+  - id: inpatients
+    description: 住院管理 GET 列表、POST 住院登记
+  - id: medical_records
+    description: 病历管理 GET 列表、POST 追加（不可篡改）
+  - id: orders
+    description: 医嘱 GET/POST、GET by id
+  - id: audit_logs
+    description: 操作审计日志 GET（不可篡改，医疗合规）
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

@@ -1,0 +1,38 @@
+# SkyWalking APM：OAP + UI，服务调用链路、性能瓶颈、错误分析
+# 使用：docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.apm.yml up -d
+# 应用侧需配置 SkyWalking Python/Java Agent 指向 oap:11800
+
+version: "3.8"
+
+services:
+  oap:
+    image: apache/skywalking-oap-server:9.7.0
+    container_name: paas-skywalking-oap
+    environment:
+      # 默认 H2 存储；需 Elasticsearch 时改为 SW_STORAGE=elasticsearch 并先起 ELK
+      SW_STORAGE: h2
+      SW_HEALTH_CHECKER: default
+      SW_TELEMETRY: prometheus
+    ports:
+      - "11800:11800"   # gRPC
+      - "12800:12800"   # REST
+    networks:
+      - paas-net
+    restart: unless-stopped
+
+  skywalking-ui:
+    image: apache/skywalking-ui:9.7.0
+    container_name: paas-skywalking-ui
+    environment:
+      SW_OAP_ADDRESS: http://oap:12800
+    ports:
+      - "${SKYWALKING_UI_PORT:-8080}:8080"
+    depends_on:
+      - oap
+    networks:
+      - paas-net
+    restart: unless-stopped
+
+networks:
+  paas-net:
+    external: true

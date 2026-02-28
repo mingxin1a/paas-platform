@@ -1,0 +1,7 @@
+# 复制模板后：将 cell_name 改为 erp、mes 等，status 按阶段填写
+cell_name: _template
+status: building
+version: "1.0.0"
+last_gap_at: null
+last_evolution_at: null
+completion_manifest: completion.manifest

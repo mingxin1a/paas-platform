@@ -1,0 +1,617 @@
+# 全部 Cell 模块：Deployment + Service（批次1+批次2）
+# 镜像需先构建并推送：superpaas/cell-<name>:latest
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-crm
+  namespace: paas
+  labels:
+    app: cell-crm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-crm
+  template:
+    metadata:
+      labels:
+        app: cell-crm
+    spec:
+      containers:
+        - name: crm
+          image: superpaas/cell-crm:latest
+          ports:
+            - containerPort: 8001
+          env:
+            - name: PORT
+              value: "8001"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-crm
+  namespace: paas
+spec:
+  selector:
+    app: cell-crm
+  ports:
+    - port: 8001
+      targetPort: 8001
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-erp
+  namespace: paas
+  labels:
+    app: cell-erp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-erp
+  template:
+    metadata:
+      labels:
+        app: cell-erp
+    spec:
+      containers:
+        - name: erp
+          image: superpaas/cell-erp:latest
+          ports:
+            - containerPort: 8002
+          env:
+            - name: PORT
+              value: "8002"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-erp
+  namespace: paas
+spec:
+  selector:
+    app: cell-erp
+  ports:
+    - port: 8002
+      targetPort: 8002
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-wms
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-wms
+  template:
+    metadata:
+      labels:
+        app: cell-wms
+    spec:
+      containers:
+        - name: wms
+          image: superpaas/cell-wms:latest
+          ports:
+            - containerPort: 8003
+          env:
+            - name: PORT
+              value: "8003"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-wms
+  namespace: paas
+spec:
+  selector:
+    app: cell-wms
+  ports:
+    - port: 8003
+      targetPort: 8003
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-hrm
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-hrm
+  template:
+    metadata:
+      labels:
+        app: cell-hrm
+    spec:
+      containers:
+        - name: hrm
+          image: superpaas/cell-hrm:latest
+          ports:
+            - containerPort: 8004
+          env:
+            - name: PORT
+              value: "8004"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8004
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-hrm
+  namespace: paas
+spec:
+  selector:
+    app: cell-hrm
+  ports:
+    - port: 8004
+      targetPort: 8004
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-oa
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-oa
+  template:
+    metadata:
+      labels:
+        app: cell-oa
+    spec:
+      containers:
+        - name: oa
+          image: superpaas/cell-oa:latest
+          ports:
+            - containerPort: 8005
+          env:
+            - name: PORT
+              value: "8005"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-oa
+  namespace: paas
+spec:
+  selector:
+    app: cell-oa
+  ports:
+    - port: 8005
+      targetPort: 8005
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-mes
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-mes
+  template:
+    metadata:
+      labels:
+        app: cell-mes
+    spec:
+      containers:
+        - name: mes
+          image: superpaas/cell-mes:latest
+          ports:
+            - containerPort: 8006
+          env:
+            - name: PORT
+              value: "8006"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8006
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-mes
+  namespace: paas
+spec:
+  selector:
+    app: cell-mes
+  ports:
+    - port: 8006
+      targetPort: 8006
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-tms
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-tms
+  template:
+    metadata:
+      labels:
+        app: cell-tms
+    spec:
+      containers:
+        - name: tms
+          image: superpaas/cell-tms:latest
+          ports:
+            - containerPort: 8007
+          env:
+            - name: PORT
+              value: "8007"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8007
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-tms
+  namespace: paas
+spec:
+  selector:
+    app: cell-tms
+  ports:
+    - port: 8007
+      targetPort: 8007
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-srm
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-srm
+  template:
+    metadata:
+      labels:
+        app: cell-srm
+    spec:
+      containers:
+        - name: srm
+          image: superpaas/cell-srm:latest
+          ports:
+            - containerPort: 8008
+          env:
+            - name: PORT
+              value: "8008"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8008
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-srm
+  namespace: paas
+spec:
+  selector:
+    app: cell-srm
+  ports:
+    - port: 8008
+      targetPort: 8008
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-plm
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-plm
+  template:
+    metadata:
+      labels:
+        app: cell-plm
+    spec:
+      containers:
+        - name: plm
+          image: superpaas/cell-plm:latest
+          ports:
+            - containerPort: 8009
+          env:
+            - name: PORT
+              value: "8009"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8009
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-plm
+  namespace: paas
+spec:
+  selector:
+    app: cell-plm
+  ports:
+    - port: 8009
+      targetPort: 8009
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-ems
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-ems
+  template:
+    metadata:
+      labels:
+        app: cell-ems
+    spec:
+      containers:
+        - name: ems
+          image: superpaas/cell-ems:latest
+          ports:
+            - containerPort: 8010
+          env:
+            - name: PORT
+              value: "8010"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8010
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-ems
+  namespace: paas
+spec:
+  selector:
+    app: cell-ems
+  ports:
+    - port: 8010
+      targetPort: 8010
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-his
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-his
+  template:
+    metadata:
+      labels:
+        app: cell-his
+    spec:
+      containers:
+        - name: his
+          image: superpaas/cell-his:latest
+          ports:
+            - containerPort: 8011
+          env:
+            - name: PORT
+              value: "8011"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8011
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-his
+  namespace: paas
+spec:
+  selector:
+    app: cell-his
+  ports:
+    - port: 8011
+      targetPort: 8011
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-lis
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-lis
+  template:
+    metadata:
+      labels:
+        app: cell-lis
+    spec:
+      containers:
+        - name: lis
+          image: superpaas/cell-lis:latest
+          ports:
+            - containerPort: 8012
+          env:
+            - name: PORT
+              value: "8012"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8012
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-lis
+  namespace: paas
+spec:
+  selector:
+    app: cell-lis
+  ports:
+    - port: 8012
+      targetPort: 8012
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cell-lims
+  namespace: paas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cell-lims
+  template:
+    metadata:
+      labels:
+        app: cell-lims
+    spec:
+      containers:
+        - name: lims
+          image: superpaas/cell-lims:latest
+          ports:
+            - containerPort: 8013
+          env:
+            - name: PORT
+              value: "8013"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8013
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cell-lims
+  namespace: paas
+spec:
+  selector:
+    app: cell-lims
+  ports:
+    - port: 8013
+      targetPort: 8013
+  type: ClusterIP

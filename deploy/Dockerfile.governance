@@ -1,0 +1,10 @@
+# 治理中心：注册发现、健康巡检、链路与 RED 指标
+FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONPATH=/app
+ENV APP_ROOT=/app
+COPY platform_core/ ./platform_core/
+COPY deploy/run_governance.py ./deploy/run_governance.py
+RUN pip install --no-cache-dir flask
+EXPOSE 8005
+CMD ["python", "/app/deploy/run_governance.py"]

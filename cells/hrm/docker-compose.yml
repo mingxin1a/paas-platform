@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  hrm-cell:
+    build: .
+    ports:
+      - "${PORT:-8004}:8004"
+    environment:
+      - PORT=8004
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

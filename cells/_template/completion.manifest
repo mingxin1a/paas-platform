@@ -1,0 +1,14 @@
+# 复制模板后：替换为实际交付能力列表
+cell_name: _template
+version: "1.0.0"
+delivered:
+  - id: health
+    description: 健康检查 /health，符合网关注册与健康巡检
+  - id: auth
+    description: 鉴权拦截器（标准化 HTTP 调用平台认证）
+  - id: response_format
+    description: 统一响应格式与错误码（code、message、details、requestId）
+  - id: api_items
+    description: 示例资源 items CRUD（复制后替换为业务资源）
+  - id: unit_tests
+    description: tests/ 单元测试

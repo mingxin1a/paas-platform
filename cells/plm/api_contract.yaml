@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info: { title: PLM Cell API, version: 1.0.0 }
+servers: [{ url: /api/v1/plm }]
+paths:
+  /health:
+    get:
+      responses: { '200': { description: OK } }
+  /products:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /boms:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /change-records:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /documents:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: productId, in: query }, { name: docType, in: query }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /process-routes:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: productId, in: query }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /drawings:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: productId, in: query }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /audit-logs:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+components:
+  schemas: { Error: { type: object, properties: { code: {}, message: {}, requestId: {} } } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

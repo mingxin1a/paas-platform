@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+*.egg-info/
+.eggs/
+dist/*.tar.gz
+*.egg
+
+# Env
+.env
+.venv/
+venv/
+env/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Build / deploy
+*.log
+.cache/
+.coverage
+glass_house/health_report.json
+
+# Node
+node_modules/
+frontend/dist/
+frontend-admin/dist/
+*.tsbuildinfo

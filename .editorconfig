@@ -1,0 +1,23 @@
+# 全平台代码风格（Python/Java/Vue 统一）
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{py}]
+indent_style = space
+indent_size = 4
+
+[*.{js,ts,jsx,tsx,vue}]
+indent_style = space
+indent_size = 2
+
+[*.{json,yaml,yml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info: { title: LIMS Cell API, version: 1.0.0 }
+servers: [{ url: /api/v1/lims }]
+paths:
+  /health:
+    get:
+      responses: { '200': { description: OK } }
+  /config/retention:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+  /samples:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /samples/{sampleId}/receive:
+    post:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK }, '404': { description: Not Found } }
+  /tasks:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /experiment-data:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /results:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+  /reports:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header }, { name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /reports/{reportId}/review:
+    post:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK }, '404': { description: Not Found } }
+  /reports/{reportId}/archive:
+    post:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK }, '404': { description: Not Found } }
+  /trace:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: entityType, in: query }, { name: entityId, in: query }]
+      responses: { '200': { description: OK } }
+components:
+  schemas: { Error: { type: object, properties: { code: {}, message: {}, requestId: {} } } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

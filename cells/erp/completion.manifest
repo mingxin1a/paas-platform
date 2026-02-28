@@ -1,0 +1,28 @@
+# ERP 细胞交付清单 - 开放功能探索 + 封闭架构实现（CPO+CA）
+# 《erp_自主产品规格说明书.md》本期实现
+cell_name: erp
+version: "1.1.0"
+delivered:
+  - id: gl
+    description: 财务总账（科目、分录 GET by id、科目余额、试算表、按期间筛选凭证）
+    contract: api_contract.yaml
+  - id: ar_ap
+    description: 应收/应付发票 GET by id、收款/付款登记、账龄报表
+    contract: api_contract.yaml
+  - id: mm
+    description: 物料管理（物料、采购订单 GET/POST、GET by id）
+    contract: api_contract.yaml
+  - id: pp
+    description: 生产计划（BOM、工单 GET by id、工单报工）
+    contract: api_contract.yaml
+  - id: orders
+    description: 订单 GET/POST、GET by id
+    contract: api_contract.yaml
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: unit_tests
+    description: tests/unit/
+  - id: acceptance_tests
+    description: tests/acceptance/（含试算表、收款付款、账龄、工单报工）
+  - id: product_spec
+    description: erp_自主产品规格说明书.md

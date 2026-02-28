@@ -1,0 +1,13 @@
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{max-width:380px;width:100%;background:var(--color-surface);border-radius:var(--radius-md);border:1px solid var(--color-border);padding:32px;box-shadow:var(--shadow-md)}
+.title{font-size:1.5rem;font-weight:700;margin:0 0 4px}
+.subtitle{color:var(--color-text-secondary);margin:0 0 24px;font-size:0.875rem}
+.form{display:flex;flex-direction:column;gap:16px}
+.label{display:flex;flex-direction:column;gap:6px;font-size:0.875rem;font-weight:500}
+.input{padding:10px 12px;border:1px solid var(--color-border);border-radius:6px;font-size:1rem}
+.input:focus{outline:none;border-color:var(--color-primary)}
+.error{color:var(--color-error);font-size:0.875rem}
+.btn{padding:12px;background:var(--color-primary);color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:500}
+.btn:hover:not(:disabled){opacity:.9}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.hint{margin:16px 0 0;font-size:0.75rem;color:var(--color-text-secondary)}

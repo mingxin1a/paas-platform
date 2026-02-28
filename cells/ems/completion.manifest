@@ -1,0 +1,26 @@
+# EMS 细胞交付清单 - 能源管理（能耗采集→统计→分析→预警→报表→节能建议）
+cell_name: ems
+version: "1.0.0"
+delivered:
+  - id: consumption_records
+    description: 能耗采集 GET/POST、GET by id
+  - id: stats
+    description: 能耗统计 GET /stats?period=day|week|month|year
+  - id: analysis
+    description: 能耗分析 GET /analysis
+  - id: alerts
+    description: 能耗预警 GET/POST
+  - id: reports
+    description: 能耗报表 GET /reports
+  - id: suggestions
+    description: 节能建议 GET /suggestions
+  - id: export
+    description: 能耗数据导出 GET /export（监管留存）
+  - id: audit_logs
+    description: 操作审计日志 GET /audit-logs（不可篡改）
+  - id: health
+    description: 健康检查、config/retention
+  - id: business_logic
+    description: src/store.py + src/app.py + event_publisher
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

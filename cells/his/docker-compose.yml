@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  his-cell:
+    build: .
+    ports:
+      - "${PORT:-8011}:8011"
+    environment:
+      - PORT=8011
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8011/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

@@ -1,0 +1,41 @@
+# Prometheus 细胞/租户维度监控（与 prometheus.example.yml 合并使用）
+# 细胞维度：每个 cell 一个 target，label cell=xxx
+# 租户维度：由网关/治理中心 metrics 中 tenant_id 标签体现（若暴露）
+
+scrape_configs:
+  - job_name: 'gateway'
+    metrics_path: /health
+    static_configs:
+      - targets: ['gateway:8000']
+        labels:
+          component: gateway
+  - job_name: 'cells'
+    metrics_path: /health
+    static_configs:
+      - targets: ['crm-cell:8001']
+        labels:
+          cell: crm
+      - targets: ['erp-cell:8002']
+        labels:
+          cell: erp
+      - targets: ['wms-cell:8003']
+        labels:
+          cell: wms
+      - targets: ['mes-cell:8006']
+        labels:
+          cell: mes
+      - targets: ['tms-cell:8007']
+        labels:
+          cell: tms
+      - targets: ['oa-cell:8004']
+        labels:
+          cell: oa
+      - targets: ['srm-cell:8005']
+        labels:
+          cell: srm
+  - job_name: 'governance'
+    metrics_path: /api/governance/health
+    static_configs:
+      - targets: ['governance:8005']
+        labels:
+          component: governance

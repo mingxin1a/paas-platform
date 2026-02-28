@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  plm-cell:
+    build: .
+    ports:
+      - "${PORT:-8009}:8009"
+    environment:
+      - PORT=8009
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8009/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

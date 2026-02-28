@@ -1,0 +1,12 @@
+# MES 细胞交付清单 - 制造执行系统（CPO+CA）
+cell_name: mes
+version: "0.1.0"
+delivered:
+  - id: work_orders
+    description: 工单 GET/POST、GET by id、PATCH 状态/报工
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

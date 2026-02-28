@@ -1,0 +1,20 @@
+# LIS 细胞交付清单 - 检验申请→样本接收→结果录入→报告生成→审核→发布
+cell_name: lis
+version: "1.0.0"
+delivered:
+  - id: test_requests
+    description: 检验申请 GET/POST
+  - id: samples
+    description: 样本 GET/POST、GET by id、POST /samples/:id/receive 样本接收
+  - id: results
+    description: 检验结果 GET/POST、GET by id
+  - id: reports
+    description: 报告 GET/POST、GET by id、review、publish
+  - id: audit_logs
+    description: 操作审计日志 GET（检验规范）
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

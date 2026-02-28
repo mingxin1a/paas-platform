@@ -1,0 +1,24 @@
+# LIMS 细胞交付清单 - 样品接收→任务分配→数据录入→报告→审核→归档
+cell_name: lims
+version: "1.0.0"
+delivered:
+  - id: samples
+    description: 样品 GET/POST、GET by id、POST /samples/:id/receive 样品接收
+  - id: tasks
+    description: 实验任务 GET/POST、GET by id
+  - id: experiment_data
+    description: 实验数据 GET/POST
+  - id: results
+    description: 结果 GET/POST、GET by id
+  - id: reports
+    description: 报告 GET/POST、GET by id、review、archive
+  - id: trace
+    description: 数据溯源 GET（实验室合规可审计）
+  - id: config_retention
+    description: 数据留存配置 GET（≥5年）
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

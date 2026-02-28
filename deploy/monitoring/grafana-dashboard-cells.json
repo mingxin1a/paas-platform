@@ -1,0 +1,29 @@
+{
+  "title": "PaaS 细胞与租户监控",
+  "uid": "paas-cells-tenant",
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "细胞健康",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "up{job=\"cells\"}", "legendFormat": "{{ cell }}"}]
+    },
+    {
+      "id": 2,
+      "title": "网关健康",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "up{job=\"gateway\"}", "legendFormat": "gateway"}]
+    },
+    {
+      "id": 3,
+      "title": "按细胞请求量（占位）",
+      "type": "graph",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [{"expr": "sum(rate(http_requests_total[5m])) by (cell)", "legendFormat": "{{ cell }}"}]
+    }
+  ],
+  "schemaVersion": 38
+}

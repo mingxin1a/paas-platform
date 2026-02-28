@@ -1,0 +1,28 @@
+# 非敏感环境变量（开发/测试/预发布/生产可通过不同 ConfigMap 或 Kustomize 覆盖）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paas-env
+  namespace: paas
+  labels:
+    app.kubernetes.io/name: superpaas
+data:
+  GATEWAY_PORT: "8000"
+  GOVERNANCE_PORT: "8005"
+  MONITOR_PORT: "9000"
+  USE_REAL_FORWARD: "1"
+  # 集群内细胞 URL（网关/治理中心用）
+  CELL_CRM_URL: "http://cell-crm:8001"
+  CELL_ERP_URL: "http://cell-erp:8002"
+  CELL_WMS_URL: "http://cell-wms:8003"
+  CELL_HRM_URL: "http://cell-hrm:8004"
+  CELL_OA_URL: "http://cell-oa:8005"
+  CELL_MES_URL: "http://cell-mes:8006"
+  CELL_TMS_URL: "http://cell-tms:8007"
+  CELL_SRM_URL: "http://cell-srm:8008"
+  CELL_PLM_URL: "http://cell-plm:8009"
+  CELL_EMS_URL: "http://cell-ems:8010"
+  CELL_HIS_URL: "http://cell-his:8011"
+  CELL_LIS_URL: "http://cell-lis:8012"
+  CELL_LIMS_URL: "http://cell-lims:8013"
+  GOVERNANCE_URL: "http://governance:8005"

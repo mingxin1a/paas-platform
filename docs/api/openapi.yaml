@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: SuperPaaS 网关 API
+  description: 全平台统一入口；细胞路由 /api/v1/{cell}/{path}。错误码见 错误码规范.md。
+  version: 2.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: 本地网关
+
+paths:
+  /health:
+    get:
+      summary: 网关健康
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: up
+
+  /api/auth/login:
+    post:
+      summary: 登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { type: object }
+        "400":
+          description: BAD_REQUEST
+        "401":
+          description: UNAUTHORIZED
+
+  /api/auth/me:
+    get:
+      summary: 当前用户
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: UNAUTHORIZED
+
+  /api/v1/{cell}/{path}:
+    parameters:
+      - name: cell
+        in: path
+        required: true
+        schema: { type: string }
+      - name: path
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: 细胞 GET
+    post:
+      summary: 细胞 POST
+    put:
+      summary: 细胞 PUT
+    patch:
+      summary: 细胞 PATCH
+    delete:
+      summary: 细胞 DELETE
+
+  /api/admin/audit-logs:
+    get:
+      summary: 操作审计检索
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: since
+          in: query
+          schema: { type: number }
+        - name: to
+          in: query
+          schema: { type: number }
+        - name: traceId
+          in: query
+          schema: { type: string }
+        - name: tenantId
+          in: query
+          schema: { type: string }
+        - name: cell
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100 }
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: UNAUTHORIZED
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: string }
+        requestId: { type: string }

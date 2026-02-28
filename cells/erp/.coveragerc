@@ -1,0 +1,6 @@
+[run]
+source = src
+omit = */signing_verify.py,*/tests/*
+
+[report]
+exclude_lines = pragma: no cover

@@ -1,0 +1,24 @@
+# PLM 细胞交付清单 - 产品设计→BOM版本→工艺→变更→文档→图纸
+cell_name: plm
+version: "1.0.0"
+delivered:
+  - id: products
+    description: 产品设计 GET/POST、GET by id、批量导入
+  - id: boms
+    description: BOM 版本管理 GET/POST、GET by id
+  - id: process_routes
+    description: 工艺管理 GET/POST、GET by id
+  - id: change_records
+    description: 变更管理 GET/POST
+  - id: documents
+    description: 文档管理 GET/POST（docType drawing|process_file）
+  - id: drawings
+    description: 图纸管理 GET/POST（即 drawing 文档）
+  - id: audit_logs
+    description: 操作审计日志 GET（不可篡改）
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py + event_publisher
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

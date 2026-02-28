@@ -1,0 +1,7 @@
+# SuperPaaS 联动 Worker（事件总线消费，调用网关实现 ERP→MES→WMS→TMS 等联动）
+FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+COPY platform_core/ /app/platform_core/
+RUN pip install --no-cache-dir -q 2>/dev/null || true
+ENTRYPOINT ["python", "-m", "platform_core.sync_worker.worker"]

@@ -1,0 +1,12 @@
+# OA 细胞交付清单 - 协同办公（CPO+CA）
+cell_name: oa
+version: "0.1.0"
+delivered:
+  - id: tasks
+    description: 任务 GET/POST、GET by id、PATCH 状态
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

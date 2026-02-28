@@ -1,0 +1,39 @@
+# CRM 细胞自愈策略
+# 《01_核心法律》细胞自治；零心智负担：开箱即用
+# 当条件满足时执行对应 action（需 SUPPAAS_AUTO_HEAL_RESTART=1 才执行 restart）
+
+cell: crm
+version: "1.0"
+
+rules:
+  - id: api_error_rate_high
+    description: API 错误率 > 5% 时自动重启服务实例
+    when:
+      metric: api_error_rate
+      threshold: 0.05
+      window: 60s
+    action: restart_instance
+    restart_command: "echo 'restart crm-cell'"
+
+  - id: connection_pool_exhausted
+    description: 检测到连接池耗尽
+    when:
+      log_pattern: "connection pool exhausted|pool size exhausted"
+    action: log
+    escalate: true
+
+  - id: timeout
+    description: 频繁超时
+    when:
+      log_pattern: "timeout|timed out"
+      count: 10
+      window: 60s
+    action: restart_instance
+    restart_command: "echo 'restart crm-cell'"
+
+  - id: oom
+    description: 内存不足
+    when:
+      log_pattern: "OutOfMemoryError|MemoryError"
+    action: restart_instance
+    restart_command: "echo 'restart crm-cell'"

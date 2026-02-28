@@ -1,0 +1,131 @@
+# 企业级 Prometheus 全量采集配置
+# 业务指标、系统指标、数据库指标；与 alert_rules/*.yml、alertmanager 配套使用
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+scrape_configs:
+  # ---------- PaaS 核心 ----------
+  - job_name: 'gateway'
+    metrics_path: /health
+    static_configs:
+      - targets: ['gateway:8000']
+        labels:
+          component: gateway
+          layer: paas
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'gateway:8000'
+
+  - job_name: 'governance'
+    metrics_path: /api/governance/health
+    static_configs:
+      - targets: ['governance:8005']
+        labels:
+          component: governance
+          layer: paas
+
+  - job_name: 'monitor'
+    metrics_path: /health
+    static_configs:
+      - targets: ['monitor:9000']
+        labels:
+          component: monitor
+          layer: paas
+
+  # ---------- 全量 Cell 健康（业务指标基础） ----------
+  - job_name: 'cells-health'
+    metrics_path: /health
+    static_configs:
+      - targets: ['crm-cell:8001']
+        labels: { cell: crm, layer: cell }
+      - targets: ['erp-cell:8002']
+        labels: { cell: erp, layer: cell }
+      - targets: ['wms-cell:8003']
+        labels: { cell: wms, layer: cell }
+      - targets: ['hrm-cell:8004']
+        labels: { cell: hrm, layer: cell }
+      - targets: ['oa-cell:8005']
+        labels: { cell: oa, layer: cell }
+      - targets: ['mes-cell:8006']
+        labels: { cell: mes, layer: cell }
+      - targets: ['tms-cell:8007']
+        labels: { cell: tms, layer: cell }
+      - targets: ['srm-cell:8008']
+        labels: { cell: srm, layer: cell }
+      - targets: ['plm-cell:8009']
+        labels: { cell: plm, layer: cell }
+      - targets: ['ems-cell:8010']
+        labels: { cell: ems, layer: cell }
+      - targets: ['his-cell:8011']
+        labels: { cell: his, layer: cell }
+      - targets: ['lis-cell:8012']
+        labels: { cell: lis, layer: cell }
+      - targets: ['lims-cell:8013']
+        labels: { cell: lims, layer: cell }
+
+  # ---------- 网关 /metrics（接口性能：需网关暴露 Prometheus 格式） ----------
+  - job_name: 'gateway-metrics'
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['gateway:8000']
+        labels:
+          component: gateway
+    scrape_timeout: 5s
+
+  # ---------- 系统指标（Node Exporter，可选） ----------
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          component: host
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ---------- Redis 指标（可选，启用 Redis 时） ----------
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          component: redis
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ---------- 数据库指标（需部署 postgres_exporter / mysql_exporter 后取消注释） ----------
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  #   metrics_path: /metrics
+  #   scrape_interval: 30s
+
+  # ---------- Blackbox HTTP 探针（可选：探测外网或指定 URL） ----------
+  # - job_name: 'blackbox-http'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]
+  #   static_configs:
+  #     - targets: ['http://gateway:8000/health']
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - target_label: __address__
+  #       replacement: blackbox-exporter:9115
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __param_target
+  #       replacement: __param_target
+  #     - target_label: __metrics_path__
+  #       replacement: /probe
+  #     - target_label: __address__
+  #       replacement: blackbox-exporter:9115

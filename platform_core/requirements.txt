@@ -1,0 +1,11 @@
+# SuperPaaS Platform Core（网关、注册中心、监控客户端）
+# 网关运行依赖
+flask>=2.3.0
+# 路由配置 YAML/JSON 解析（GATEWAY_ROUTES_PATH 指向 .yaml 时）
+PyYAML>=6.0
+# 红绿灯：CPU 检测（可选，未安装时红绿灯不生效）
+psutil>=5.9.0
+# 高可用：网关集群会话共享（仅当 GATEWAY_SESSION_STORE_URL 配置时使用）
+redis>=4.5.0
+# 性能：网关转发连接池与压缩（可选，未安装时回退 urllib）
+urllib3>=2.0.0

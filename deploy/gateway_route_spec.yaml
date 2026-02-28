@@ -1,0 +1,42 @@
+# 网关路由规范（可选）：Docker 网络内使用服务名
+# 与 docker-compose 服务名一致；不使用时由环境变量 CELL_*_URL 注入
+routes:
+  - id: cell-crm
+    path_prefix: /api/cells/crm
+    upstream: http://crm-cell:8001
+  - id: cell-erp
+    path_prefix: /api/cells/erp
+    upstream: http://erp-cell:8002
+  - id: cell-wms
+    path_prefix: /api/cells/wms
+    upstream: http://wms-cell:8003
+  - id: cell-hrm
+    path_prefix: /api/cells/hrm
+    upstream: http://hrm-cell:8004
+  - id: cell-oa
+    path_prefix: /api/cells/oa
+    upstream: http://oa-cell:8005
+  - id: cell-mes
+    path_prefix: /api/cells/mes
+    upstream: http://mes-cell:8006
+  - id: cell-tms
+    path_prefix: /api/cells/tms
+    upstream: http://tms-cell:8007
+  - id: cell-srm
+    path_prefix: /api/cells/srm
+    upstream: http://srm-cell:8008
+  - id: cell-plm
+    path_prefix: /api/cells/plm
+    upstream: http://plm-cell:8009
+  - id: cell-ems
+    path_prefix: /api/cells/ems
+    upstream: http://ems-cell:8010
+  - id: cell-his
+    path_prefix: /api/cells/his
+    upstream: http://his-cell:8011
+  - id: cell-lis
+    path_prefix: /api/cells/lis
+    upstream: http://lis-cell:8012
+  - id: cell-lims
+    path_prefix: /api/cells/lims
+    upstream: http://lims-cell:8013

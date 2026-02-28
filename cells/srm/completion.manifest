@@ -1,0 +1,14 @@
+# SRM 细胞交付清单 - 供应商与采购（CPO+CA）
+cell_name: srm
+version: "0.1.0"
+delivered:
+  - id: suppliers
+    description: 供应商 GET/POST、GET by id
+  - id: purchase_orders
+    description: 采购订单 GET/POST、GET by id、PATCH 状态
+  - id: health
+    description: 健康检查
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

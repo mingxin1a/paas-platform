@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONPATH=/app
+ENV APP_ROOT=/app
+COPY platform_core/ ./platform_core/
+COPY deploy/run_gateway.py ./deploy/run_gateway.py
+COPY platform_core/requirements.txt ./platform_core/requirements.txt
+RUN pip install --no-cache-dir -r ./platform_core/requirements.txt
+CMD ["python", "/app/deploy/run_gateway.py"]

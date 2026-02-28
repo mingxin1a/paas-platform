@@ -1,0 +1,18 @@
+# SuperPaaS 公共资源：Namespace、ConfigMap 占位
+# 用法：kubectl apply -f deploy/k8s/k8s-common.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: paas
+  labels:
+    app.kubernetes.io/name: superpaas
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paas-env
+  namespace: paas
+data:
+  GATEWAY_PORT: "8000"
+  GOVERNANCE_PORT: "8005"
+  MONITOR_PORT: "9000"

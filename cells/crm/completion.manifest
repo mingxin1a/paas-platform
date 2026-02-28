@@ -1,0 +1,27 @@
+# CRM 细胞交付清单（FastAPI 实现）
+# 符合 delivery.package.schema.md：id、description、contract
+cell_name: crm
+version: "2.0.0"
+delivered:
+  - id: api_customers
+    description: 客户管理 CRUD（GET/POST/GET by id/PATCH/DELETE）
+    contract: api_contract.yaml
+  - id: api_contacts
+    description: 联系人管理 CRUD
+    contract: api_contract.yaml
+  - id: api_opportunities
+    description: 商机管理 CRUD
+    contract: api_contract.yaml
+  - id: api_follow_ups
+    description: 跟进记录 CRUD
+    contract: api_contract.yaml
+  - id: health
+    description: 健康检查 /health，符合网关自动注册与健康巡检规范
+  - id: auth
+    description: 鉴权（标准化 HTTP 调用平台认证，不依赖 platform_core）
+  - id: config
+    description: 独立数据库与配置（CRM_DATABASE_URL、PORT、PLATFORM_AUTH_URL）
+  - id: unit_tests
+    description: tests/unit/test_fastapi_crm.py 单元测试
+  - id: verify_delivery
+    description: scripts/verify_delivery.py 交付校验脚本

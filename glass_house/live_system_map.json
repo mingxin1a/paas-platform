@@ -1,0 +1,74 @@
+{
+  "$schema": "https://suppaas.dev/schemas/live_system_map_v1.json",
+  "version": "1.0",
+  "generatedAt": "2025-02-24T00:00:00Z",
+  "description": "机器可读的实时系统拓扑，供外部监控/编排工具消费",
+  "layers": [
+    {
+      "id": "perception",
+      "name": "感知交互层",
+      "components": [
+        { "id": "web", "type": "entry", "name": "Web/移动端" },
+        { "id": "cli", "type": "entry", "name": "CLI" }
+      ]
+    },
+    {
+      "id": "platform_core",
+      "name": "PaaS 核心平台",
+      "components": [
+        { "id": "gateway", "type": "service", "name": "标准化接口网关", "path": "platform_core/core/gateway/", "healthPath": "/health", "capabilities": ["routing", "circuit_breaker", "tracing"] },
+        { "id": "registry", "type": "service", "name": "注册中心", "path": "platform_core/core/registry/", "capabilities": ["discovery", "health_check", "autoscale_suggestion"] },
+        { "id": "monitor", "type": "service", "name": "全量化监控", "path": "platform_core/core/monitor/", "capabilities": ["golden_metrics", "trace_id", "span_id"] }
+      ]
+    },
+    {
+      "id": "cells",
+      "name": "业务细胞",
+      "domains": [
+        {
+          "id": "business",
+          "name": "智慧商业",
+          "cells": [
+            { "id": "crm", "name": "CRM", "path": "cells/crm/", "apiPrefix": "/api/v1/crm", "healthPath": "/api/v1/crm/health", "aiAgent": "cells/crm/ai_agent.py", "autoHealing": "cells/crm/auto_healing.yaml" },
+            { "id": "erp", "name": "ERP", "path": "cells/erp/", "apiPrefix": "/api/v1/erp", "healthPath": "/api/v1/erp/health", "aiAgent": "cells/erp/ai_agent.py", "autoHealing": "cells/erp/auto_healing.yaml" },
+            { "id": "oa", "name": "OA", "path": "cells/oa/", "apiPrefix": "/api/v1/oa", "healthPath": "/api/v1/oa/health", "aiAgent": "cells/oa/ai_agent.py", "autoHealing": "cells/oa/auto_healing.yaml" }
+          ]
+        },
+        {
+          "id": "supply_chain",
+          "name": "智慧供应链",
+          "cells": [
+            { "id": "srm", "name": "SRM", "path": "cells/srm/", "apiPrefix": "/api/v1/srm", "aiAgent": "cells/srm/ai_agent.py", "autoHealing": "cells/srm/auto_healing.yaml" },
+            { "id": "wms", "name": "WMS", "path": "cells/wms/", "apiPrefix": "/api/v1/wms", "aiAgent": "cells/wms/ai_agent.py", "autoHealing": "cells/wms/auto_healing.yaml" },
+            { "id": "tms", "name": "TMS", "path": "cells/tms/", "apiPrefix": "/api/v1/tms", "aiAgent": "cells/tms/ai_agent.py", "autoHealing": "cells/tms/auto_healing.yaml" },
+            { "id": "mes", "name": "MES", "path": "cells/mes/", "apiPrefix": "/api/v1/mes", "aiAgent": "cells/mes/ai_agent.py", "autoHealing": "cells/mes/auto_healing.yaml" },
+            { "id": "plm", "name": "PLM", "path": "cells/plm/", "apiPrefix": "/api/v1/plm", "aiAgent": "cells/plm/ai_agent.py", "autoHealing": "cells/plm/auto_healing.yaml" },
+            { "id": "ems", "name": "EMS", "path": "cells/ems/", "apiPrefix": "/api/v1/ems", "aiAgent": "cells/ems/ai_agent.py", "autoHealing": "cells/ems/auto_healing.yaml" }
+          ]
+        },
+        {
+          "id": "medical",
+          "name": "智慧医疗",
+          "cells": [
+            { "id": "his", "name": "HIS", "path": "cells/his/", "apiPrefix": "/api/v1/his", "aiAgent": "cells/his/ai_agent.py", "autoHealing": "cells/his/auto_healing.yaml" },
+            { "id": "lis", "name": "LIS", "path": "cells/lis/", "apiPrefix": "/api/v1/lis", "aiAgent": "cells/lis/ai_agent.py", "autoHealing": "cells/lis/auto_healing.yaml" },
+            { "id": "lims", "name": "LIMS", "path": "cells/lims/", "apiPrefix": "/api/v1/lims", "aiAgent": "cells/lims/ai_agent.py", "autoHealing": "cells/lims/auto_healing.yaml" }
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    { "from": "web", "to": "gateway" },
+    { "from": "cli", "to": "gateway" },
+    { "from": "gateway", "to": "registry" },
+    { "from": "gateway", "to": "monitor" },
+    { "from": "registry", "to": "cells" },
+    { "from": "gateway", "to": "cells" }
+  ],
+  "principles": {
+    "container": "接口契约不可变，细胞仅经网关/事件通信",
+    "zeroCognitiveLoad": "操作路径 ≤3 层，开箱即用",
+    "glassHouse": "架构决策与拓扑透明可查"
+  }
+}

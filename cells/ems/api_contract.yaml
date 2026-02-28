@@ -1,0 +1,55 @@
+openapi: 3.0.3
+info: { title: EMS Cell API, version: 1.0.0 }
+servers: [{ url: /api/v1/ems }]
+paths:
+  /health:
+    get:
+      responses: { '200': { description: OK } }
+  /config/retention:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+  /consumption-records:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /stats:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: period, in: query }]
+      responses: { '200': { description: OK } }
+  /analysis:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: period, in: query }]
+      responses: { '200': { description: OK } }
+  /alerts:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /reports:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: period, in: query }, { name: periodKey, in: query }]
+      responses: { '200': { description: OK } }
+  /suggestions:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+  /export:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }, { name: fromDate, in: query }, { name: toDate, in: query }]
+      responses: { '200': { description: OK } }
+  /audit-logs:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header }]
+      responses: { '200': { description: OK } }
+components:
+  schemas: { Error: { type: object, properties: { code: {}, message: {}, requestId: {} } } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

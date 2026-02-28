@@ -1,0 +1,21 @@
+# Filebeat：采集 Docker 容器 stdout 日志，发送至 Logstash；支持全链路 trace_id
+filebeat.inputs:
+  - type: container
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    processors:
+      - add_docker_metadata:
+          host: "socket:///var/run/docker.sock"
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
+          when.not.contains: ["message", "trace_id"]
+    # 可选：仅采集 PaaS 相关容器（通过 include_container_label 或 Logstash 按 docker.container.name 过滤）
+
+output.logstash:
+  hosts: ["logstash:5044"]
+  bulk_max_size: 1024
+
+logging.level: info
+logging.to_files: false

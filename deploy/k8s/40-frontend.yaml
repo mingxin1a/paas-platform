@@ -1,0 +1,81 @@
+# 双端前端：客户端 + 管理端
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: paas
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: superpaas/frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: paas
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-admin
+  namespace: paas
+  labels:
+    app: frontend-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-admin
+  template:
+    metadata:
+      labels:
+        app: frontend-admin
+    spec:
+      containers:
+        - name: frontend-admin
+          image: superpaas/frontend-admin:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-admin
+  namespace: paas
+spec:
+  selector:
+    app: frontend-admin
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

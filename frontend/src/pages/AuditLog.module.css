@@ -1,0 +1,12 @@
+.page { max-width: 800px; }
+.title { font-size: 1.5rem; font-weight: 700; margin: 0 0 var(--space-unit); }
+.subtitle { color: var(--color-text-secondary); margin: 0 0 calc(var(--space-unit) * 3); font-size: 0.9375rem; }
+.placeholder {
+  padding: calc(var(--space-unit) * 4);
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+}
+.hint { font-size: 0.875rem; margin-top: var(--space-unit); }

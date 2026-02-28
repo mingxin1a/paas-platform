@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info: { title: TMS Cell API, version: 1.0.0 }
+servers: [{ url: /api/v1/tms }]
+paths:
+  /shipments:
+    get:
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: OK } }
+    post:
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+components:
+  schemas: { Error: { type: object, properties: { code: {}, message: {}, requestId: {} } } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

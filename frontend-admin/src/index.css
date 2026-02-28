@@ -1,0 +1,4 @@
+:root{--color-primary:#2563eb;--color-primary-muted:rgba(37,99,235,.12);--color-bg:#f8fafc;--color-surface:#fff;--color-border:#e2e8f0;--color-text:#0f172a;--radius-md:10px;--font-sans:"Plus Jakarta Sans",system-ui,sans-serif}
+body{margin:0;font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);min-height:100vh}
+#root{min-height:100vh}
+button{font-family:inherit;cursor:pointer}

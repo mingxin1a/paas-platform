@@ -1,0 +1,43 @@
+# Prometheus 抓取配置示例（商用化监控）
+# 使用方式：复制到实际 Prometheus 配置中，或作为参考合并到现有 prometheus.yml
+# 注意：实际部署时请根据服务名、端口、网络调整 target 地址
+
+scrape_configs:
+  # 网关健康
+  - job_name: 'gateway'
+    metrics_path: /health
+    static_configs:
+      - targets: ['gateway:8000']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: gateway:8000
+
+  # 治理中心健康
+  - job_name: 'governance'
+    metrics_path: /api/governance/health
+    static_configs:
+      - targets: ['governance:8005']
+
+  # 监控中心健康
+  - job_name: 'monitor'
+    metrics_path: /health
+    static_configs:
+      - targets: ['monitor:9000']
+
+  # 各 Cell 健康（示例：crm-cell, erp-cell；按实际 docker-compose 服务名补充）
+  - job_name: 'cells'
+    metrics_path: /health
+    static_configs:
+      - targets:
+          - 'crm-cell:8001'
+          - 'erp-cell:8002'
+        labels:
+          cell: 'crm'
+      - targets:
+          - 'erp-cell:8002'
+        labels:
+          cell: 'erp'

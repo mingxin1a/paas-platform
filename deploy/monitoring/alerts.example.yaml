@@ -1,0 +1,46 @@
+# Prometheus AlertManager 告警规则示例（商用化）
+# 使用方式：在 Prometheus 配置中引用此文件，或合并到现有 alerting 规则
+# 实际阈值与通知渠道需根据业务调整
+
+groups:
+  - name: paas-platform
+    rules:
+      # 网关不可用
+      - alert: GatewayDown
+        expr: up{job="gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "网关不可用"
+          description: "Gateway has been down for more than 1 minute."
+
+      # 治理中心不可用
+      - alert: GovernanceDown
+        expr: up{job="governance"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "治理中心不可用"
+          description: "Governance service has been down for more than 1 minute."
+
+      # 错误率过高（需配合实际 metrics 名称；此处为占位）
+      - alert: HighErrorRate
+        expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job)) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "错误率过高"
+          description: "Job {{ $labels.job }} 5xx 率超过 10%."
+
+      # 响应过慢（需配合实际 metrics；此处为占位）
+      - alert: HighLatency
+        expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "接口响应过慢"
+          description: "Job {{ $labels.job }} P99 延迟超过 5 秒."

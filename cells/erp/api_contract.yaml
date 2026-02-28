@@ -1,0 +1,121 @@
+# ERP 细胞 API 合约 - SAP 式：GL、AR/AP、MM、PP
+# 遵循《接口设计说明书_V2.0》：必须头、幂等、错误格式
+openapi: 3.0.3
+info:
+  title: ERP Cell API
+  description: 企业资源计划 - 财务总账、应收应付、物料管理、生产计划
+  version: 1.0.0
+servers: [{ url: /api/v1/erp }]
+tags:
+  - name: gl
+    description: 财务总账
+  - name: ar
+    description: 应收
+  - name: ap
+    description: 应付
+  - name: mm
+    description: 物料管理
+  - name: pp
+    description: 生产计划
+  - name: orders
+    description: 订单
+paths:
+  /health:
+    get:
+      summary: 健康检查
+      responses: { '200': { description: OK } }
+  /orders:
+    get:
+      tags: [orders]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK } }
+    post:
+      tags: [orders]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /gl/accounts:
+    get:
+      tags: [gl]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 科目列表 } }
+    post:
+      tags: [gl]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /gl/journal-entries:
+    get:
+      tags: [gl]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 分录列表 } }
+    post:
+      tags: [gl]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /ar/invoices:
+    get:
+      tags: [ar]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 应收发票列表 } }
+    post:
+      tags: [ar]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /ap/invoices:
+    get:
+      tags: [ap]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 应付发票列表 } }
+    post:
+      tags: [ap]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /mm/materials:
+    get:
+      tags: [mm]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 物料列表 } }
+    post:
+      tags: [mm]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /mm/purchase-orders:
+    get:
+      tags: [mm]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 采购订单列表 } }
+    post:
+      tags: [mm]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /pp/boms:
+    get:
+      tags: [pp]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: BOM 列表 } }
+    post:
+      tags: [pp]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+  /pp/work-orders:
+    get:
+      tags: [pp]
+      parameters: [{ name: X-Tenant-Id, in: header, required: true }]
+      responses: { '200': { description: 工单列表 } }
+    post:
+      tags: [pp]
+      parameters: [{ name: X-Request-ID, in: header, required: true }, { name: X-Tenant-Id, in: header, required: true }]
+      requestBody: { content: { application/json: { schema: { type: object } } } }
+      responses: { '201': { description: Created } }
+components:
+  schemas:
+    Error: { type: object, properties: { code: {}, message: {}, details: {}, requestId: {} } }
+  securitySchemes: { BearerAuth: { type: http, scheme: bearer, bearerFormat: JWT } }
+security: [{ BearerAuth: [] }]

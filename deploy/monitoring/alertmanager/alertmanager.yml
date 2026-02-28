@@ -1,0 +1,86 @@
+# 企业级 Alertmanager：邮件、钉钉、企业微信；告警分级 P0-P3 路由
+
+global:
+  resolve_timeout: 5m
+  # 邮件 SMTP（由环境变量或外部覆盖）
+  # smtp_smarthost: 'smtp.example.com:587'
+  # smtp_from: 'alertmanager@example.com'
+
+route:
+  receiver: default
+  group_by: ['alertname', 'cell', 'severity', 'job']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 4h
+  routes:
+    # P0：网关/治理/细胞宕机 -> 钉钉 + 邮件 + 企业微信
+    - match:
+        severity: p0
+      receiver: p0-critical
+      continue: true
+    - match:
+        severity: p0
+      receiver: p0-email
+    # P1：接口异常、性能 -> 钉钉 + 邮件
+    - match:
+        severity: p1
+      receiver: p1-high
+    # P2：资源不足 -> 邮件
+    - match:
+        severity: p2
+      receiver: p2-warning
+    # P3：数据异常 -> 仅记录/邮件可选
+    - match:
+        severity: p3
+      receiver: p3-info
+
+receivers:
+  - name: default
+    # 默认可指向日志或低优先级邮件
+    # email_configs:
+    #   - to: 'ops@example.com'
+
+  - name: p0-critical
+    # 钉钉机器人 Webhook（需创建自定义机器人并替换 URL）
+    webhook_configs:
+      - url: 'http://dingtalk-webhook:8060/dingtalk/webhook1/send'
+        send_resolved: true
+    # 企业微信机器人（可选）
+    # wechat_configs:
+    #   - api_url: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=XXX'
+    #     send_resolved: true
+
+  - name: p0-email
+    email_configs:
+      - to: '{{ .GroupLabels.severity }}@example.com'
+        headers:
+          Subject: '[P0] SuperPaaS 告警 - {{ .GroupLabels.alertname }}'
+        send_resolved: true
+        # 实际部署时配置 smtp_* 或使用 global
+
+  - name: p1-high
+    webhook_configs:
+      - url: 'http://dingtalk-webhook:8060/dingtalk/webhook1/send'
+        send_resolved: true
+    # email_configs:
+    #   - to: 'sre@example.com'
+
+  - name: p2-warning
+    email_configs:
+      - to: 'team@example.com'
+        headers:
+          Subject: '[P2] SuperPaaS 告警 - {{ .GroupLabels.alertname }}'
+        send_resolved: true
+
+  - name: p3-info
+    # 仅记录或发往低优先级邮箱
+    # email_configs:
+    #   - to: 'ops-log@example.com'
+
+# 抑制规则：网关宕机时抑制细胞不可用告警（避免刷屏）
+inhibit_rules:
+  - source_match:
+      alertname: GatewayDown
+    target_match_re:
+      alertname: CellDown|HighErrorRate
+    equal: []

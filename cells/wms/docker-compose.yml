@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  wms-cell:
+    build: .
+    ports:
+      - "${PORT:-8003}:8003"
+    environment:
+      - PORT=8003
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

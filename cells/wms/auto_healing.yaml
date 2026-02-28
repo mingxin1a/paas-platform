@@ -1,0 +1,11 @@
+cell: wms
+version: "1.0"
+rules:
+  - id: api_error_rate_high
+    when: { metric: api_error_rate, threshold: 0.05 }
+    action: restart_instance
+    restart_command: "echo 'restart wms-cell'"
+  - id: connection_pool_exhausted
+    when: { log_pattern: "connection pool exhausted" }
+    action: log
+    escalate: true

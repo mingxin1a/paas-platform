@@ -1,0 +1,744 @@
+# CRM 细胞 API 合约
+# 遵循《接口设计说明书_V2.0》：HTTPS/JSON/UTF-8、/api/v1、必须请求头/响应头、错误格式、幂等
+openapi: 3.0.3
+info:
+  title: CRM Cell API
+  description: 客户关系管理细胞标准化接口，经 PaaS 网关暴露
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/crm
+    description: 通过 PaaS 网关路由
+
+tags:
+  - name: customers
+    description: 客户
+  - name: opportunities
+    description: 商机
+  - name: contacts
+    description: 联系人
+  - name: leads
+    description: 线索
+  - name: follow-ups
+    description: 跟进记录
+
+paths:
+  /customers:
+    get:
+      tags: [customers]
+      summary: 客户列表
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Response-Time:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Customer' } }
+                  total: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [customers]
+      summary: 创建客户（幂等：X-Request-ID）
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerCreate' }
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Response-Time:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Customer' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { description: 幂等冲突，已存在同 X-Request-ID 的资源 }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /customers/{customerId}:
+    get:
+      tags: [customers]
+      summary: 客户详情
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: customerId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Response-Time:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Customer' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /opportunities:
+    get:
+      tags: [opportunities]
+      summary: 商机列表
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: customerId
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Response-Time:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Opportunity' } }
+                  total: { type: integer }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [opportunities]
+      summary: 创建商机（幂等：X-Request-ID）
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OpportunityCreate' }
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Response-Time:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Opportunity' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /leads:
+    get:
+      tags: [leads]
+      summary: 线索列表
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string, enum: [new, qualified, unqualified, converted] }
+        - name: assignedTo
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Lead' } }
+                  total: { type: integer }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [leads]
+      summary: 创建线索（幂等：X-Request-ID）
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeadCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lead' }
+        '409': { description: 幂等冲突 }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /leads/{leadId}:
+    get:
+      tags: [leads]
+      summary: 线索详情
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: leadId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lead' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [leads]
+      summary: 分配线索
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: leadId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeadAssign' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lead' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /leads/{leadId}/convert:
+    post:
+      tags: [leads]
+      summary: 转化线索（为客户/商机）
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: leadId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeadConvert' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LeadConvertResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /contacts:
+    get:
+      tags: [contacts]
+      summary: 联系人列表
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: customerId
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Contact' } }
+                  total: { type: integer }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [contacts]
+      summary: 创建联系人（幂等：X-Request-ID）
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContactCreate' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Contact' }
+        '409': { description: 幂等冲突 }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /customers/{customerId}/360:
+    get:
+      tags: [customers]
+      summary: 客户 360° 视图（账户+联系人+商机+关系）
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: customerId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Customer360' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /customers/{customerId}/relationships:
+    get:
+      tags: [customers]
+      summary: 客户关系图谱
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: customerId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes: { type: array, items: { $ref: '#/components/schemas/RelationshipNode' } }
+                  edges: { type: array, items: { $ref: '#/components/schemas/RelationshipEdge' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /opportunities/forecast:
+    get:
+      tags: [opportunities]
+      summary: 商机预测金额（按阶段汇总）
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ForecastSummary' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /opportunities/win-rate:
+    get:
+      tags: [opportunities]
+      summary: 赢率分析
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: periodDays
+          in: query
+          schema: { type: integer, default: 90 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WinRateAnalysis' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /follow-ups:
+    get:
+      tags: [follow-ups]
+      summary: 跟进记录列表
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: customerId
+          in: query
+          schema: { type: string }
+        - name: opportunityId
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/FollowUp' } }
+                  total: { type: integer }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      tags: [follow-ups]
+      summary: 创建跟进记录（幂等：X-Request-ID）
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FollowUpCreate' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FollowUp' }
+        '409': { description: 幂等冲突 }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /follow-ups/{followUpId}:
+    get:
+      tags: [follow-ups]
+      summary: 跟进记录详情
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: followUpId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FollowUp' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [follow-ups]
+      summary: 更新跟进记录
+      parameters:
+        - name: X-Request-ID
+          in: header
+          required: true
+          schema: { type: string }
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: followUpId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FollowUpUpdate' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FollowUp' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [follow-ups]
+      summary: 删除跟进记录
+      parameters:
+        - name: X-Tenant-Id
+          in: header
+          required: true
+          schema: { type: string }
+        - name: followUpId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: No Content
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  security:
+    - BearerAuth: []
+
+  schemas:
+    Customer:
+      type: object
+      properties:
+        customerId: { type: string }
+        tenantId: { type: string }
+        name: { type: string }
+        contactPhone: { type: string }
+        contactEmail: { type: string }
+        status: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CustomerCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        contactPhone: { type: string }
+        contactEmail: { type: string }
+    Opportunity:
+      type: object
+      properties:
+        opportunityId: { type: string }
+        tenantId: { type: string }
+        customerId: { type: string }
+        title: { type: string }
+        amountCents: { type: integer, description: 金额-分 }
+        currency: { type: string }
+        stage: { type: integer }
+        status: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    OpportunityCreate:
+      type: object
+      required: [customerId, title]
+      properties:
+        customerId: { type: string }
+        title: { type: string }
+        amountCents: { type: integer }
+        currency: { type: string, default: CNY }
+    Lead:
+      type: object
+      properties:
+        leadId: { type: string }
+        tenantId: { type: string }
+        name: { type: string }
+        company: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        source: { type: string }
+        status: { type: string }
+        assignedTo: { type: string }
+        convertedCustomerId: { type: string }
+        convertedOpportunityId: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    LeadCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        company: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        source: { type: string }
+    LeadAssign:
+      type: object
+      required: [assignedTo]
+      properties:
+        assignedTo: { type: string }
+    LeadConvert:
+      type: object
+      properties:
+        convertTo: { type: string, enum: [account, opportunity, both] }
+        createOpportunityTitle: { type: string }
+        amountCents: { type: integer }
+    LeadConvertResult:
+      type: object
+      properties:
+        leadId: { type: string }
+        customerId: { type: string }
+        opportunityId: { type: string }
+    Contact:
+      type: object
+      properties:
+        contactId: { type: string }
+        tenantId: { type: string }
+        customerId: { type: string }
+        name: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        isPrimary: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ContactCreate:
+      type: object
+      required: [customerId, name]
+      properties:
+        customerId: { type: string }
+        name: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        isPrimary: { type: boolean }
+    Customer360:
+      type: object
+      properties:
+        customer: { $ref: '#/components/schemas/Customer' }
+        contacts: { type: array, items: { $ref: '#/components/schemas/Contact' } }
+        opportunities: { type: array, items: { $ref: '#/components/schemas/Opportunity' } }
+        relationships: { type: array, items: { $ref: '#/components/schemas/RelationshipEdge' } }
+    RelationshipNode:
+      type: object
+      properties:
+        customerId: { type: string }
+        name: { type: string }
+    RelationshipEdge:
+      type: object
+      properties:
+        fromCustomerId: { type: string }
+        toCustomerId: { type: string }
+        relationshipType: { type: string }
+    ForecastSummary:
+      type: object
+      properties:
+        byStage: { type: array, items: { type: object, properties: { stage: {}, stageName: {}, totalAmountCents: {}, count: {} } } }
+        totalWeightedCents: { type: integer }
+    WinRateAnalysis:
+      type: object
+      properties:
+        periodDays: { type: integer }
+        wonCount: { type: integer }
+        lostCount: { type: integer }
+        winRatePct: { type: number }
+    FollowUp:
+      type: object
+      properties:
+        followUpId: { type: string }
+        tenantId: { type: string }
+        customerId: { type: string }
+        opportunityId: { type: string }
+        contactId: { type: string }
+        content: { type: string }
+        followUpType: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    FollowUpCreate:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string }
+        customerId: { type: string }
+        opportunityId: { type: string }
+        contactId: { type: string }
+        followUpType: { type: string, default: call }
+    FollowUpUpdate:
+      type: object
+      properties:
+        content: { type: string }
+    Error:
+      type: object
+      required: [code, message, requestId]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: string }
+        requestId: { type: string }
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: 未授权
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    InternalError:
+      description: 服务端错误
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

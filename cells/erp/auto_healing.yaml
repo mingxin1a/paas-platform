@@ -1,0 +1,15 @@
+cell: erp
+version: "1.0"
+rules:
+  - id: api_error_rate_high
+    when: { metric: api_error_rate, threshold: 0.05, window: 60s }
+    action: restart_instance
+    restart_command: "echo 'restart erp-cell'"
+  - id: connection_pool_exhausted
+    when: { log_pattern: "connection pool exhausted" }
+    action: log
+    escalate: true
+  - id: timeout
+    when: { log_pattern: "timeout", count: 10, window: 60s }
+    action: restart_instance
+    restart_command: "echo 'restart erp-cell'"

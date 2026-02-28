@@ -1,0 +1,30 @@
+# WMS 细胞交付清单 - 全细胞自主进化协议（CPO+CA+DR）
+# 《wms_自主产品规格说明书.md》
+cell_name: wms
+version: "1.0.0"
+delivered:
+  - id: inventory
+    description: 库存查询（按仓库/SKU）
+    contract: api_contract.yaml
+  - id: inbound_orders
+    description: 入库单 CRUD、GET by id（含行项目）、行项目、收货确认（更新库存）
+    contract: api_contract.yaml
+  - id: outbound_orders
+    description: 出库单 CRUD、GET by id（含行项目）、行项目、发货确认（扣减库存）
+    contract: api_contract.yaml
+  - id: locations
+    description: 库位主数据 GET/POST、GET by id
+    contract: 自主产品规格说明书
+  - id: lots
+    description: 批次追踪、批次查询、GET by id、FIFO 建议
+    contract: 自主产品规格说明书
+  - id: business_logic
+    description: src/store.py + src/app.py
+  - id: unit_tests
+    description: tests/unit/
+  - id: acceptance_tests
+    description: tests/acceptance/
+  - id: product_spec
+    description: wms_自主产品规格说明书.md
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml

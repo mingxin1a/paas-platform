@@ -1,0 +1,6 @@
+FROM python:3.11-slim
+WORKDIR /app
+COPY deploy/monitor_center.py ./monitor_center.py
+RUN pip install --no-cache-dir flask
+ENV PORT=9000
+CMD ["python", "/app/monitor_center.py"]

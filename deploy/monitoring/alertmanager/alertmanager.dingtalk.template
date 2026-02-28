@@ -1,0 +1,11 @@
+# 钉钉 Webhook 需通过适配器（如 prometheus-webhook-dingtalk）将 Alertmanager 格式转为钉钉 API
+# 本模板为 Alertmanager 内置模板，用于邮件/其他渠道的告警内容
+
+{{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] SuperPaaS {{ .GroupLabels.alertname }}{{ end }}
+{{ define "__description" }}
+{{ range .Alerts }}
+告警: {{ .Annotations.summary }}
+详情: {{ .Annotations.description }}
+级别: {{ .Labels.severity }} | 细胞: {{ .Labels.cell }}
+{{ end }}
+{{ end }}

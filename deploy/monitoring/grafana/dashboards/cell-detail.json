@@ -1,0 +1,62 @@
+{
+  "title": "Cell 模块详情",
+  "uid": "paas-cell-detail",
+  "version": 1,
+  "schemaVersion": 38,
+  "tags": ["paas", "cell"],
+  "templating": {
+    "list": [
+      {
+        "name": "cell",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "query": "label_values(up{job=\"cells-health\"}, cell)",
+        "multi": false,
+        "includeAll": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "当前细胞健康",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "up{job=\"cells-health\", cell=\"$cell\"}",
+        "legendFormat": "健康"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "该细胞 QPS",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 12, "x": 6, "y": 0},
+      "targets": [{
+        "expr": "sum(rate(http_requests_total{cell=\"$cell\"}[5m]))",
+        "legendFormat": "QPS"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "该细胞 P99 延迟",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 6},
+      "targets": [{
+        "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{cell=\"$cell\"}[5m])) by (le))",
+        "legendFormat": "P99"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "该细胞错误率",
+      "type": "timeseries",
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 6},
+      "targets": [{
+        "expr": "sum(rate(http_requests_total{cell=\"$cell\", status=~\"5..\"}[5m])) / sum(rate(http_requests_total{cell=\"$cell\"}[5m])) * 100",
+        "legendFormat": "5xx %"
+      }]
+    }
+  ],
+  "refresh": "30s"
+}

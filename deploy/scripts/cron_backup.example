@@ -1,0 +1,7 @@
+# 定时备份 crontab 示例（请根据实际路径修改）
+# 全量备份：每日 02:00
+# 0 2 * * * BACKUP_TYPE=full BACKUP_DIR=/backup/paas /path/to/paas-platform/deploy/scripts/backup_runner.sh
+# 增量备份：每 6 小时（若采用增量策略）
+# 0 */6 * * * BACKUP_TYPE=incremental BACKUP_DIR=/backup/paas /path/to/paas-platform/deploy/scripts/backup_runner.sh
+# 加载配置后执行（推荐）
+# 0 2 * * * . /path/to/paas-platform/deploy/scripts/backup_config.env 2>/dev/null; /path/to/paas-platform/deploy/scripts/backup_runner.sh

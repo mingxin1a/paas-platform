@@ -1,0 +1,15 @@
+cell_name: hrm
+version: "0.1.0"
+delivered:
+  - id: employees
+    description: 员工 GET/POST、GET by id（骨架）
+  - id: departments
+    description: 部门 GET/POST、GET by id（骨架）
+  - id: leave_requests
+    description: 请假申请 GET/POST、GET by id、PATCH 审批状态（骨架）
+  - id: health
+    description: 健康检查
+  - id: ai_agent
+    description: ai_agent.py + auto_healing.yaml
+  - id: product_spec
+    description: 外部孵化，对标 OrangeHRM，SuperPaaS 架构重写

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>细胞前后端运行确认 - SuperPaaS</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1rem; background: #f5f5f5; }
+    h1 { font-size: 1.25rem; }
+    .cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 0.5rem; }
+    .cell { background: #fff; padding: 0.75rem; border-radius: 6px; border-left: 4px solid #ccc; }
+    .cell.ok { border-left-color: #0a0; }
+    .cell.fail { border-left-color: #c00; }
+    .cell.pending { border-left-color: #fa0; }
+    .cell strong { display: block; }
+    .cell span { font-size: 0.85rem; color: #666; }
+    button { margin: 0.5rem 0; padding: 0.5rem 1rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>细胞前后端运行确认</h1>
+  <p>通过网关探测各细胞 /health，确认后端可被前端正确调用。</p>
+  <button id="run">探测全部细胞</button>
+  <div class="cells" id="cells"></div>
+  <script>
+    var CELLS = ['crm','erp','wms','hrm','oa','mes','tms','srm','plm','ems','his','lis','lims'];
+    var base = '';
+    function render() {
+      var el = document.getElementById('cells');
+      el.innerHTML = CELLS.map(function(c) {
+        return '<div class="cell pending" id="cell-' + c + '"><strong>' + c + '</strong><span>未探测</span></div>';
+      }).join('');
+    }
+    function setCell(cell, ok, text) {
+      var div = document.getElementById('cell-' + cell);
+      if (!div) return;
+      div.className = 'cell ' + (ok ? 'ok' : 'fail');
+      div.querySelector('span').textContent = text || (ok ? '200 OK' : '失败');
+    }
+    document.getElementById('run').onclick = function() {
+      render();
+      CELLS.forEach(function(cell) {
+        var url = (base || '') + '/api/v1/' + cell + '/health';
+        fetch(url, { headers: { 'Authorization': 'Bearer demo', 'X-Tenant-Id': 'demo' } })
+          .then(function(r) {
+            return r.json().then(function(j) {
+              setCell(cell, r.ok, r.status + ' ' + (j && j.cell ? j.cell : (j && j.status || '')));
+            }).catch(function() { setCell(cell, r.ok, r.status + ''); });
+          })
+          .catch(function(e) { setCell(cell, false, e.message || '网络错误'); });
+      });
+    };
+    render();
+  </script>
+</body>
+</html>

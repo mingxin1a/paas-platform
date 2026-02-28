@@ -1,0 +1,2 @@
+# HRM 细胞独立依赖（解耦：不依赖 platform_core）
+flask>=2.3.0
